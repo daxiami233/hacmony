@@ -1,6 +1,6 @@
 # HACMony
 
-HACMony is an LLM-based mobile application automation testing tool that supports intelligent application exploration and testing on Android and HarmonyOS devices. It can autonomously explore and achieve testing goals based on user-defined hardware types or provided test scripts.
+HACMony is an LLM-based mobile application automation testing tool that supports intelligent application exploration and detecting Hopping-related Audio-stream Conflict (HAC) Issues.
 
 ## Features
 
