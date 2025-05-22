@@ -1,7 +1,7 @@
 import pytest
 from abc import ABC, abstractmethod
-from hmbot.event import *
-from hmbot.proto import AudioStatus, ResourceType
+from hacmony.event import *
+from hacmony.proto import AudioStatus, ResourceType
 
 class Generator(ABC):
     """
@@ -36,20 +36,18 @@ class AudioGenerator(Generator):
         test_case_content += "    def __init__(self):\n"
         test_case_content += f'        self.src_device = Device(\'{self.serials[0]}\', \'{self.os}\')\n'
         test_case_content += f'        self.tgt_device = Device(\'{self.serials[1]}\', \'{self.os}\')\n'
-        # todo
+
         src_device_name = '\''+'Ice'+'\''
         tgt_device_name = '\''+'MatePad'+'\''
 
         for index, p in enumerate(all_paths):
             src_window = p.get('src_window')
             src_app = src_window.bundle
-            # todo
             src_app_name = 'qqmusic'
             src_events = p.get('src_events')
             tgt_window = p.get('tgt_window')
             tgt_events = p.get('tgt_events')
             tgt_app = [e.app for e in tgt_events if isinstance(e, StartAppEvent)][0]
-            # todo
             tgt_app_name = 'douyin'
 
             test_case_content += f"\n    # {src_app} test case {index+1}\n"
@@ -69,12 +67,10 @@ class AudioGenerator(Generator):
                 elif isinstance(e, LongClickEvent):
                     center = e.node.attribute['center']
                     test_case_content += f'        self.src_device.long_click({center[0]},{center[1]})\n'
-                # todo
                 elif isinstance(e, InputEvent):
                     pass
                 elif isinstance(e, SwipeExtEvent):
                     test_case_content += f'        self.src_device.swipe_ext({e.direction})\n'
-                # todo
                 elif isinstance(e, KeyEvent):
                     pass
 
@@ -86,32 +82,36 @@ class AudioGenerator(Generator):
                 elif isinstance(e, LongClickEvent):
                     center = e.node.attribute['center']
                     test_case_content += f'        self.tgt_device.long_click({center[0]},{center[1]})\n'
-                # todo
                 elif isinstance(e, InputEvent):
                     pass
                 elif isinstance(e, SwipeExtEvent):
                     test_case_content += f'        self.tgt_device.swipe_ext({e.direction})\n'
-                # todo
                 elif isinstance(e, KeyEvent):
                     pass
-                
+
+            test_case_content += f'\n        tc_res_dict = {{}}\n'
+
             test_case_content += f'\n        # hop src_app to tgt_device\n'
             test_case_content += f'        self.src_device.hop({tgt_device_name}, {src_app_name})\n'
-            # todo cur_window inf
             test_case_content += f'        cur_window = self.tgt_device.dump_window(refresh=True)\n'
+            test_case_content += f'        cur_rsc = cur_window.rsc\n'
+            test_case_content += f'        tc_res_dict[\'sa_to_td\'] = cur_rsc\n'
 
             test_case_content += f'\n        # hop src_app back to src_device\n'
             test_case_content += f'        self.tgt_device.hop({src_device_name}, {src_app_name})\n'
-            # todo cur_window inf
             test_case_content += f'        cur_window = self.src_device.dump_window(refresh=True)\n'
+            test_case_content += f'        cur_rsc = cur_window.rsc\n'
+            test_case_content += f'        tc_res_dict[\'sa_to_sd\'] = cur_rsc\n'
 
             test_case_content += f'\n        # hop tgt_app to src_device\n'
             test_case_content += f'        self.tgt_device.hop({src_device_name}, {tgt_app_name})\n'
-            # todo cur_window inf
             test_case_content += f'        cur_window = self.src_device.dump_window(refresh=True)\n'
+            test_case_content += f'        cur_rsc = cur_window.rsc\n'
+            test_case_content += f'        tc_res_dict[\'ta_to_sd\'] = cur_rsc\n'
 
             test_case_content += f'\n        self.src_device.stop_app({src_app})\n'
             test_case_content += f'        self.tgt_device.stop_app({tgt_app})\n'
+            test_case_content += f'        print(tc_res_dict)\n'
 
         test_case_file = f"test_{self.app.replace('.', '_')}.py"
         try:
